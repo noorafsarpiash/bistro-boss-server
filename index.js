@@ -208,11 +208,14 @@ async function run() {
       });
     });
 
-    app.get("/payments", verifyToken, async (req, res) => {
-      const query = { email: req.query.email };
-      if (req.params.email !== req.decoded.email) {
+    app.get("/payments/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+
+      if (email !== req.decoded.email) {
         return res.status(403).send({ message: "forbidden access" });
       }
+
+      const query = { email };
       const result = await paymentCollection.find(query).toArray();
       res.send(result);
     });
