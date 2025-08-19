@@ -6,14 +6,13 @@ require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
-import FormData from "form-data"; // form-data v4.0.1
-import Mailgun from "mailgun.js"; // mailgun.js v11.1.0
+const FormData = require("form-data");
+const Mailgun = require("mailgun.js");
 
 const mailgun = new Mailgun(FormData);
 const mg = mailgun.client({
   username: "api",
-  key: process.env.MAILGUN_API_KEY,
-  url: process.env.MAILGUN_API_URL,
+  key: process.env.MAIL_GUN_API_KEY || "API_KEY",
 });
 
 app.use(cors());
@@ -241,6 +240,24 @@ async function run() {
       };
 
       const deleteResult = await cartCollection.deleteMany(query);
+
+      try {
+        const data = await mg.messages.create(process.env.MAIL_SENDING_DOMAIN, {
+          from: "Mailgun Sandbox <postmaster@sandboxf088b3350ee64ec5afeb50d0856cb99e.mailgun.org>",
+          to: ["Noor Afsar Piash <noorpiash1234@gmail.com>"],
+          subject: "Bistro Boss Payment Confirmation",
+          html: `
+          <div>
+          <h2>Thank you for your order</h2>
+          <h4>Your Transaction Id: <strong>${payment.transactionId}</strong></h4>
+          <p>We appreciate your business and hope you enjoy your meal!</p>
+          </div>
+          `,
+        });
+      } catch (error) {
+        console.error("Failed to send email:", error);
+      }
+
       res.send({ paymentResult, deleteResult });
     });
 
