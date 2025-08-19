@@ -15,7 +15,17 @@ const mg = mailgun.client({
   key: process.env.MAIL_GUN_API_KEY || "API_KEY",
 });
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://bistro-boss-46aae.web.app", // আপনার Firebase frontend
+      "http://localhost:5173", // লোকাল ডেভেলপমেন্টের জন্য
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5mz3z44.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
